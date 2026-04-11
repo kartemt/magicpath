@@ -8,7 +8,7 @@ import BlurBgImage from '../components/BlurBgImage';
 import MagicBackground from '../components/MagicBackground';
 import { useGame } from '../contexts/GameContext';
 import { COVEN_NAMES, DIVINATION_MESSAGES, SYMBOLS } from '../data/symbols';
-import { buildManifestFields, resolveCovenByOptions, resolveTypeByOptions } from '../data/manifest';
+import { buildManifestFields, buildPrintHTML, resolveCovenByOptions, resolveTypeByOptions } from '../data/manifest';
 import { ASSET } from '../lib/assets';
 import { saveContact, trackRating } from '../lib/storage';
 
@@ -191,93 +191,108 @@ function ResetDialog({ open, onOpenChange, onConfirm }) {
 
 function ManifestDialog({ open, onOpenChange, scrollEntries, chosenOptions }) {
   const fields = buildManifestFields(scrollEntries);
-  const coven = resolveCovenByOptions(chosenOptions);
-  const type = resolveTypeByOptions(chosenOptions);
+  const coven  = resolveCovenByOptions(chosenOptions);
+  const type   = resolveTypeByOptions(chosenOptions);
 
   const handlePrint = () => {
-    window.print();
+    const html = buildPrintHTML(fields, coven, type);
+    const win  = window.open('', '_blank', 'width=680,height=920');
+    if (!win) {
+      alert('Разрешите открытие всплывающих окон в браузере и попробуйте снова.');
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+    // Give the browser time to render before showing print dialog
+    setTimeout(() => { win.focus(); win.print(); }, 600);
+  };
+
+  const fieldStyle = {
+    background: 'rgba(14,26,46,0.65)',
+    border: '1px solid rgba(201,162,39,0.22)',
+    borderRadius: 14,
+    padding: '13px 16px',
+  };
+  const labelStyle = {
+    color: 'rgba(201,162,39,0.75)',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: '0.11em',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  };
+  const valueStyle = {
+    color: '#F5F0E8',
+    fontSize: 'clamp(1rem,2.8vw,1.0625rem)',
+    lineHeight: 1.5,
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-4 max-w-md max-h-[90vh] overflow-y-auto" id="manifest-dialog">
+      <DialogContent className="mx-3 max-w-lg max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.04em' }}>
+          <DialogTitle style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.04em', fontSize: 'clamp(1rem,3vw,1.2rem)' }}>
             ✦ Моя магия проявления
           </DialogTitle>
           <DialogDescription>Ваш личный профиль — итог пяти ступеней пути</DialogDescription>
         </DialogHeader>
 
-        {/* Printable manifest block */}
-        <div id="manifest-print-content">
-          {/* Fields */}
-          <div className="flex flex-col gap-3 mt-1">
-            {fields.map(({ label, value }) => (
-              <div key={label}
-                className="rounded-xl px-4 py-3"
-                style={{
-                  background: 'rgba(14,26,46,0.6)',
-                  border: '1px solid rgba(201,162,39,0.2)',
-                }}
-              >
-                <p style={{ color: 'rgba(201,162,39,0.7)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-                  {label}
+        {/* Manifest fields */}
+        <div className="flex flex-col gap-3 mt-1">
+          {fields.map(({ label, value }) => (
+            <div key={label} style={fieldStyle}>
+              <p style={labelStyle}>{label}</p>
+              {value ? (
+                <p style={valueStyle}>{value}</p>
+              ) : (
+                <p className="italic" style={{ color: 'rgba(157,174,200,0.4)', fontSize: '0.9375rem' }}>
+                  не заполнено
                 </p>
-                {value ? (
-                  <p style={{ color: '#F5F0E8', fontSize: 'clamp(0.8125rem,2.2vw,0.9375rem)', lineHeight: 1.4 }}>
-                    {value}
-                  </p>
-                ) : (
-                  <p className="italic" style={{ color: 'rgba(157,174,200,0.4)', fontSize: '0.8125rem' }}>
-                    не заполнено
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Divider */}
-          <div className="ornament-line my-4" />
-
-          {/* Coven */}
-          <div className="rounded-xl px-4 py-3 mb-3"
-            style={{ background: 'rgba(201,162,39,0.08)', border: '1px solid rgba(201,162,39,0.3)' }}>
-            <p style={{ color: 'rgba(201,162,39,0.7)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-              Ваш ковен
-            </p>
-            <p style={{ color: '#E0C060', fontSize: 'clamp(0.875rem,2.2vw,1rem)', fontWeight: 600, marginBottom: 6 }}>
-              {coven.name}
-            </p>
-            <p style={{ color: 'rgba(201,211,231,0.7)', fontSize: '0.8125rem', lineHeight: 1.45, fontStyle: 'italic' }}>
-              {coven.description}
-            </p>
-          </div>
-
-          {/* Type */}
-          <div className="rounded-xl px-4 py-3"
-            style={{ background: 'rgba(14,26,46,0.6)', border: '1px solid rgba(157,174,200,0.2)' }}>
-            <p style={{ color: 'rgba(201,162,39,0.7)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-              Тип проявления
-            </p>
-            <p style={{ color: '#C9D3E7', fontSize: 'clamp(0.875rem,2.2vw,1rem)', fontWeight: 600, marginBottom: 6 }}>
-              {type.name}
-            </p>
-            <p style={{ color: 'rgba(201,211,231,0.65)', fontSize: '0.8125rem', lineHeight: 1.45, fontStyle: 'italic' }}>
-              {type.nextStep}
-            </p>
-          </div>
+              )}
+            </div>
+          ))}
         </div>
 
-        {/* PDF button */}
-        <button
-          className="btn-primary w-full mt-4"
-          onClick={handlePrint}
-          style={{ fontSize: '0.875rem' }}
-        >
+        <div className="ornament-line my-4" />
+
+        {/* Coven */}
+        <div className="rounded-2xl px-4 py-4 mb-3"
+          style={{ background: 'rgba(201,162,39,0.09)', border: '1.5px solid rgba(201,162,39,0.32)' }}>
+          <p style={{ ...labelStyle }}>Ваш ковен</p>
+          <p style={{ color: '#E0C060', fontSize: 'clamp(1rem,2.8vw,1.125rem)', fontWeight: 700, marginBottom: 8, fontFamily: 'Georgia, serif' }}>
+            {coven.name}
+          </p>
+          <p style={{ color: 'rgba(201,211,231,0.8)', fontSize: 'clamp(0.9rem,2.4vw,0.9375rem)', lineHeight: 1.55, fontStyle: 'italic' }}>
+            {coven.description}
+          </p>
+        </div>
+
+        {/* Type */}
+        <div className="rounded-2xl px-4 py-4"
+          style={{ background: 'rgba(14,26,46,0.65)', border: '1px solid rgba(157,174,200,0.22)' }}>
+          <p style={{ ...labelStyle }}>Тип проявления</p>
+          <p style={{ color: '#C9D3E7', fontSize: 'clamp(1rem,2.8vw,1.125rem)', fontWeight: 700, marginBottom: 8, fontFamily: 'Georgia, serif' }}>
+            {type.name}
+          </p>
+          <p style={{ color: 'rgba(201,211,231,0.8)', fontSize: 'clamp(0.9rem,2.4vw,0.9375rem)', lineHeight: 1.55, fontStyle: 'italic', marginBottom: 10 }}>
+            {type.description}
+          </p>
+          {type.risk && (
+            <p style={{ color: 'rgba(184,113,133,0.75)', fontSize: '0.875rem', lineHeight: 1.45, marginBottom: 10 }}>
+              <span style={{ fontWeight: 600 }}>Риск:</span> {type.risk}
+            </p>
+          )}
+          <p style={{ color: '#C9D3E7', fontSize: 'clamp(0.9rem,2.4vw,0.9375rem)', lineHeight: 1.5 }}>
+            <span style={{ color: '#C9A227', fontWeight: 600 }}>Следующий шаг:</span> {type.nextStep}
+          </p>
+        </div>
+
+        {/* PDF export */}
+        <button className="btn-primary w-full mt-4" onClick={handlePrint} style={{ fontSize: '0.9375rem' }}>
           Сохранить как PDF
         </button>
-        <p className="text-center text-xs mt-1" style={{ color: 'rgba(157,174,200,0.4)' }}>
-          В диалоге печати выберите «Сохранить как PDF»
+        <p className="text-center text-xs mt-1.5" style={{ color: 'rgba(157,174,200,0.45)' }}>
+          Откроется окно печати — выберите «Сохранить как PDF»
         </p>
       </DialogContent>
     </Dialog>

@@ -21,15 +21,30 @@ function AdminRoute({ children }) {
 function AdminUnlock() {
   const { token } = useParams();
   const navigate = useNavigate();
+
+  // Validate immediately on render (synchronous) to avoid blank flash
+  const valid = token === ADMIN_TOKEN;
+  if (valid) setAdmin(true);
+
   React.useEffect(() => {
-    if (token === ADMIN_TOKEN) {
-      setAdmin(true);
+    if (valid) {
       navigate('/admin', { replace: true });
     } else {
       navigate('/', { replace: true });
     }
-  }, [token, navigate]);
-  return null;
+  }, [valid, navigate]);
+
+  if (!valid) return null;
+
+  // Brief loading state while navigating
+  return (
+    <div style={{
+      minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: '#0E1A2E', color: '#C9A227', fontFamily: 'Georgia, serif', fontSize: '1.25rem',
+    }}>
+      ✦
+    </div>
+  );
 }
 
 export default function App() {

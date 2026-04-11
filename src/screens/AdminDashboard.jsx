@@ -61,7 +61,7 @@ function ContactRow({ contact, index }) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState(null);
+  const [metrics, setMetrics] = useState(() => loadMetrics());
   const [contacts, setContacts] = useState([]);
   const [confirmReset, setConfirmReset] = useState(false);
 

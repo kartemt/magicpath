@@ -10,6 +10,8 @@ import { trackKeyAction } from '../lib/storage';
 
 // ── Symbol button ────────────────────────────────────────────────────────────
 
+const SYMBOL_SIZE = 160; // px — at least 2× the original 80px
+
 function SymbolButton({ symbolId, isCompleted, isSelected, onSelect }) {
   const s = SYMBOLS[symbolId];
   const [imgFailed, setImgFailed] = useState(false);
@@ -25,24 +27,24 @@ function SymbolButton({ symbolId, isCompleted, isSelected, onSelect }) {
       aria-pressed={isSelected}
       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
     >
-      <div className="flex flex-col items-center gap-1.5" style={{ minWidth: 80 }}>
+      <div className="flex flex-col items-center gap-2" style={{ minWidth: SYMBOL_SIZE }}>
         <motion.div
-          animate={isSelected ? { scale: 1.15 } : hovered ? { scale: 1.08 } : { scale: 1 }}
+          animate={isSelected ? { scale: 1.12 } : hovered ? { scale: 1.06 } : { scale: 1 }}
           transition={{ type: 'spring', stiffness: 280, damping: 18 }}
           className="relative flex items-center justify-center rounded-full overflow-hidden"
           style={{
-            width: 80, height: 80,
+            width: SYMBOL_SIZE, height: SYMBOL_SIZE,
             border: isActive
-              ? `2.5px solid ${s.color}`
+              ? `3px solid ${s.color}`
               : hovered
-              ? `2px solid rgba(${s.colorRgb},0.7)`
-              : '1.5px solid rgba(245,240,232,0.2)',
+              ? `2.5px solid rgba(${s.colorRgb},0.7)`
+              : '2px solid rgba(245,240,232,0.25)',
             boxShadow: isSelected
-              ? `0 0 28px rgba(${s.colorRgb},0.65), 0 0 60px rgba(${s.colorRgb},0.25)`
+              ? `0 0 40px rgba(${s.colorRgb},0.7), 0 0 80px rgba(${s.colorRgb},0.28)`
               : hovered
-              ? `0 0 18px rgba(${s.colorRgb},0.45)`
+              ? `0 0 28px rgba(${s.colorRgb},0.5)`
               : isCompleted
-              ? `0 0 12px rgba(${s.colorRgb},0.3)`
+              ? `0 0 18px rgba(${s.colorRgb},0.35)`
               : 'none',
             transition: 'border 200ms, box-shadow 200ms',
           }}
@@ -55,7 +57,7 @@ function SymbolButton({ symbolId, isCompleted, isSelected, onSelect }) {
               style={{
                 width: '100%', height: '100%',
                 objectFit: 'cover', objectPosition: 'center 20%',
-                opacity: isActive || hovered ? 1 : 0.72,
+                opacity: isActive || hovered ? 1 : 0.78,
                 transition: 'opacity 200ms',
               }}
             />
@@ -64,7 +66,7 @@ function SymbolButton({ symbolId, isCompleted, isSelected, onSelect }) {
               width: '100%', height: '100%',
               background: isActive ? `rgba(${s.colorRgb},0.22)` : 'rgba(14,26,46,0.55)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 34, color: s.color,
+              fontSize: 58, color: s.color,
             }}>
               {s.emoji}
             </div>
@@ -74,29 +76,49 @@ function SymbolButton({ symbolId, isCompleted, isSelected, onSelect }) {
           {(hovered || isSelected) && (
             <div
               className="absolute inset-0 rounded-full"
-              style={{ background: `rgba(${s.colorRgb},${isSelected ? 0.22 : 0.12})` }}
+              style={{ background: `rgba(${s.colorRgb},${isSelected ? 0.22 : 0.1})` }}
             />
           )}
 
           {/* Completed tick */}
           {isCompleted && (
-            <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ background: '#C9A227', fontSize: 9, color: '#0E1A2E', fontWeight: 800, zIndex: 2 }}>
+            <div
+              className="absolute flex items-center justify-center rounded-full"
+              style={{
+                top: 6, right: 6,
+                width: 28, height: 28,
+                background: '#C9A227', fontSize: 12, color: '#0E1A2E', fontWeight: 800, zIndex: 2,
+              }}
+            >
               ✓
             </div>
           )}
         </motion.div>
 
+        {/* Symbol name */}
         <span
           className="font-semibold text-center leading-tight"
           style={{
-            fontSize: 12,
-            color: isActive ? s.color : hovered ? `rgba(${s.colorRgb},0.9)` : 'rgba(245,240,232,0.85)',
-            textShadow: '0 1px 6px rgba(14,26,46,0.95)',
+            fontSize: 16,
+            color: isActive ? s.color : hovered ? `rgba(${s.colorRgb},0.9)` : 'rgba(245,240,232,0.88)',
+            textShadow: '0 1px 8px rgba(8,15,30,0.98)',
             transition: 'color 200ms',
           }}
         >
           {s.name}
+        </span>
+
+        {/* Artifact name */}
+        <span
+          className="text-center leading-tight"
+          style={{
+            fontSize: 12,
+            color: isActive ? `rgba(${s.colorRgb},0.75)` : 'rgba(157,174,200,0.55)',
+            textShadow: '0 1px 6px rgba(8,15,30,0.9)',
+            maxWidth: SYMBOL_SIZE,
+          }}
+        >
+          {s.artifact}
         </span>
       </div>
     </button>
@@ -270,10 +292,10 @@ export default function Screen2() {
           )}
         </div>
 
-        {/* Symbol grid — bigger buttons */}
-        <div className="flex-1 flex flex-col justify-center gap-5 py-2">
+        {/* Symbol grid — 2× larger, spread vertically to match background image */}
+        <div className="flex-1 flex flex-col justify-evenly py-3">
           {/* Row 1 */}
-          <div className="flex justify-between px-2">
+          <div className="flex justify-between px-0">
             <SymbolButton symbolId="spark" isCompleted={state.completedSymbols.includes('spark')} isSelected={selected === 'spark'} onSelect={handleSelect} />
             <SymbolButton symbolId="star"  isCompleted={state.completedSymbols.includes('star')}  isSelected={selected === 'star'}  onSelect={handleSelect} />
           </div>
@@ -282,7 +304,7 @@ export default function Screen2() {
             <SymbolButton symbolId="key" isCompleted={state.completedSymbols.includes('key')} isSelected={selected === 'key'} onSelect={handleSelect} />
           </div>
           {/* Row 3 */}
-          <div className="flex justify-between px-2">
+          <div className="flex justify-between px-0">
             <SymbolButton symbolId="heart" isCompleted={state.completedSymbols.includes('heart')} isSelected={selected === 'heart'} onSelect={handleSelect} />
             <SymbolButton symbolId="moon"  isCompleted={state.completedSymbols.includes('moon')}  isSelected={selected === 'moon'}  onSelect={handleSelect} />
           </div>
@@ -303,12 +325,12 @@ export default function Screen2() {
             {phase === 'revealed' && selectedSym && (
               <motion.div key="reveal" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} className="flex flex-col items-center gap-3">
                 <div className="ornament-line w-3/4" />
-                <p className="text-center font-semibold" style={{ color: selectedSym.color, fontSize: 'clamp(0.875rem,2.5vw,1.0625rem)' }}>
-                  Артефакт: {selectedSym.artifact}
+                <p className="text-center font-semibold" style={{ color: selectedSym.color, fontSize: 'clamp(1rem,2.8vw,1.1875rem)' }}>
+                  {selectedSym.artifact}
                 </p>
                 {!state.completedSymbols.includes(selected) && (
-                  <p className="text-xs" style={{ color: 'rgba(157,174,200,0.65)' }}>
-                    {completedCount + 1}-й артефакт силы пробуждён: {completedCount + 1}/5
+                  <p className="text-sm" style={{ color: 'rgba(157,174,200,0.65)' }}>
+                    {completedCount + 1}-й артефакт силы пробуждён · {completedCount + 1}/5
                   </p>
                 )}
                 <motion.button initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="btn-primary w-full" onClick={handleContinue}>
