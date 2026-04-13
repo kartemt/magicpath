@@ -10,7 +10,7 @@ import { useGame } from '../contexts/GameContext';
 import { COVEN_NAMES, DIVINATION_MESSAGES, SYMBOLS } from '../data/symbols';
 import { buildManifestFields, buildPrintHTML, resolveCovenByOptions, resolveTypeByOptions } from '../data/manifest';
 import { ASSET } from '../lib/assets';
-import { trackRating } from '../lib/storage';
+import { trackRating, trackKeyAction } from '../lib/storage';
 import { submitContact } from '../lib/contactSubmit.js';
 
 const SCROLL_KEYS_ORDER = ['spark', 'star', 'key', 'heart', 'moon'];
@@ -128,7 +128,8 @@ function ContactDialog({ open, onOpenChange }) {
                   const t = contact.trim();
                   if (!t || t.length < 4) { setError('Введите почту или ссылку на соцсеть'); return; }
                   setSubmitting(true);
-                  await submitContact(t);
+                  const result = await submitContact(t);
+                  if (result === 'ok') trackKeyAction();
                   setSubmitting(false);
                   setStep('rating');
                 }}>{submitting ? 'Отправка…' : 'Отправить'}</button>

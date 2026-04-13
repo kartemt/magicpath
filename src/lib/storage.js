@@ -4,6 +4,22 @@
  * Никаких персональных данных здесь нет.
  */
 
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase.js';
+
+// ── Remote event ping (fire-and-forget) ────────────────────────────────────
+function sendEvent(eventType, value = 1) {
+  fetch(`${SUPABASE_URL}/rest/v1/game_events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ game: 'larets', event_type: eventType, value }),
+  }).catch(() => { /* silent — metrics are best-effort */ });
+}
+
 const KEYS = {
   game:    'qm.game.v1',
   metrics: 'qm.metrics.v1',
@@ -45,20 +61,28 @@ export function loadMetrics() {
 export function saveMetrics(m) {
   safeWrite(KEYS.metrics, m);
 }
+const SESSION_KEY = 'larets_session';
+
 export function trackVisit() {
+  // Deduplicate within the same browser session
+  if (sessionStorage.getItem(SESSION_KEY)) return;
+  sessionStorage.setItem(SESSION_KEY, '1');
   const m = loadMetrics();
   m.visitors = (m.visitors || 0) + 1;
   saveMetrics(m);
+  sendEvent('visit');
 }
 export function trackUser() {
   const m = loadMetrics();
   m.users = (m.users || 0) + 1;
   saveMetrics(m);
+  sendEvent('completion');
 }
 export function trackKeyAction() {
   const m = loadMetrics();
   m.keyActions = (m.keyActions || 0) + 1;
   saveMetrics(m);
+  sendEvent('cta');
 }
 export function trackReturn() {
   const m = loadMetrics();
@@ -69,6 +93,7 @@ export function trackRating(rating) {
   const m = loadMetrics();
   m.ratings = [...(m.ratings || []), { rating, ts: Date.now() }];
   saveMetrics(m);
+  sendEvent('rating', rating);
 }
 export function resetMetrics() {
   safeWrite(KEYS.metrics, defaultMetrics());
