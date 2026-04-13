@@ -1,9 +1,11 @@
 const BASE = import.meta.env.BASE_URL;
 
 export const ASSET = {
-  screen1: `${BASE}assets/screen1-hero.png`,
-  screen2: `${BASE}assets/screen2-choice.png`,
-  screen4: `${BASE}assets/screen4-path.png`,
+  screen1:      `${BASE}assets/screen1-hero.png`,
+  screen2:      `${BASE}assets/screen2-choice.png`,
+  screen4:      `${BASE}assets/screen4-path.png`,
+  manifestDark: `${BASE}assets/manifest-bg-dark.png`,
+  manifestLight:`${BASE}assets/manifest-bg-light.png`,
   artifacts: {
     spark: `${BASE}assets/artifact-spark.png`,
     key:   `${BASE}assets/artifact-key.png`,

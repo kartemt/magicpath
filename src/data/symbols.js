@@ -39,7 +39,7 @@ export const SYMBOLS = {
     colorRgb: '214,165,103',
     emoji: '⚿',
     scrollKey: 'key',
-    scrollLabel: 'Как я называю свой результат',
+    scrollLabel: 'Как я говорю о деньгах',
     choices: [
       {
         id: 'key-1',
@@ -70,7 +70,7 @@ export const SYMBOLS = {
     colorRgb: '193,108,121',
     emoji: '♡',
     scrollKey: 'heart',
-    scrollLabel: 'Как я говорю о деньгах',
+    scrollLabel: 'Как я называю свой результат',
     choices: [
       {
         id: 'heart-1',

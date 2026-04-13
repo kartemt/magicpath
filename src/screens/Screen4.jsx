@@ -10,7 +10,8 @@ import { useGame } from '../contexts/GameContext';
 import { COVEN_NAMES, DIVINATION_MESSAGES, SYMBOLS } from '../data/symbols';
 import { buildManifestFields, buildPrintHTML, resolveCovenByOptions, resolveTypeByOptions } from '../data/manifest';
 import { ASSET } from '../lib/assets';
-import { saveContact, trackRating } from '../lib/storage';
+import { trackRating } from '../lib/storage';
+import { submitContact } from '../lib/contactSubmit.js';
 
 const SCROLL_KEYS_ORDER = ['spark', 'star', 'key', 'heart', 'moon'];
 
@@ -106,6 +107,7 @@ function ContactDialog({ open, onOpenChange }) {
   const [step, setStep] = useState('input');
   const [rating, setRating] = useState(0);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,12 +123,15 @@ function ContactDialog({ open, onOpenChange }) {
               <input id="ci" className="magic-input" type="text" placeholder="example@email.com или @username"
                 value={contact} onChange={e => { setContact(e.target.value); setError(''); }} maxLength={200} autoComplete="email" />
               {error && <p className="text-xs" style={{ color: '#B87185' }}>{error}</p>}
-              <button className="btn-primary w-full" disabled={!contact.trim()}
-                onClick={() => {
+              <button className="btn-primary w-full" disabled={!contact.trim() || submitting}
+                onClick={async () => {
                   const t = contact.trim();
                   if (!t || t.length < 4) { setError('Введите почту или ссылку на соцсеть'); return; }
-                  saveContact({ contact: t }); setStep('rating');
-                }}>Отправить</button>
+                  setSubmitting(true);
+                  await submitContact(t);
+                  setSubmitting(false);
+                  setStep('rating');
+                }}>{submitting ? 'Отправка…' : 'Отправить'}</button>
             </motion.div>
           )}
           {step === 'rating' && (
@@ -195,7 +200,8 @@ function ManifestDialog({ open, onOpenChange, scrollEntries, chosenOptions }) {
   const type   = resolveTypeByOptions(chosenOptions);
 
   const handlePrint = () => {
-    const html = buildPrintHTML(fields, coven, type);
+    const lightBgUrl = `${window.location.origin}${ASSET.manifestLight}`;
+    const html = buildPrintHTML(fields, coven, type, lightBgUrl);
     const win  = window.open('', '_blank', 'width=680,height=920');
     if (!win) {
       alert('Разрешите открытие всплывающих окон в браузере и попробуйте снова.');
@@ -229,7 +235,14 @@ function ManifestDialog({ open, onOpenChange, scrollEntries, chosenOptions }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-3 max-w-lg max-h-[92vh] overflow-y-auto">
+      <DialogContent
+        className="mx-3 max-w-lg max-h-[92vh] overflow-y-auto"
+        style={{
+          backgroundImage: `linear-gradient(rgba(8,15,30,0.78) 0%, rgba(8,15,30,0.72) 100%), url(${ASSET.manifestDark})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
         <DialogHeader>
           <DialogTitle style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.04em', fontSize: 'clamp(1rem,3vw,1.2rem)' }}>
             ✦ Моя магия проявления

@@ -168,7 +168,7 @@ export function buildManifestFields(scrollEntries) {
 /**
  * Generate a clean print-ready HTML string for a new-window PDF export.
  */
-export function buildPrintHTML(fields, coven, type) {
+export function buildPrintHTML(fields, coven, type, lightBgUrl) {
   const fieldsHtml = fields.map(({ label, value }) => `
     <div class="section">
       <div class="label">${label}</div>
@@ -182,8 +182,10 @@ export function buildPrintHTML(fields, coven, type) {
 <title>Моя магия проявления</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, 'Times New Roman', serif; background: #fff; color: #1a1025;
-         padding: 40px 48px; max-width: 580px; margin: 0 auto; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #1a1025;
+         padding: 40px 48px; max-width: 580px; margin: 0 auto;
+         background: ${lightBgUrl ? `url(${lightBgUrl}) center/cover no-repeat` : '#fff'};
+         print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   h1 { font-size: 22px; text-align: center; color: #7a5800; margin-bottom: 4px;
        letter-spacing: 0.06em; }
   .subtitle { text-align: center; font-size: 11px; color: #9a8050; margin-bottom: 28px;

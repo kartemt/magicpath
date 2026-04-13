@@ -1,8 +1,13 @@
+/**
+ * localStorage-хранилище — только анонимная агрегированная аналитика.
+ * Контакты перенесены в Supabase (src/lib/contactSubmit.js).
+ * Никаких персональных данных здесь нет.
+ */
+
 const KEYS = {
-  game: 'qm.game.v1',
+  game:    'qm.game.v1',
   metrics: 'qm.metrics.v1',
-  contacts: 'qm.contacts.v1',
-  admin: 'qm.admin.v1',
+  admin:   'qm.admin.v1',
 };
 
 function safeRead(key, fallback) {
@@ -22,7 +27,7 @@ function safeWrite(key, value) {
   }
 }
 
-// Game state
+// ── Game state ─────────────────────────────────────────────────────────────
 export function loadGame() {
   return safeRead(KEYS.game, { completedSymbols: [], scrollEntries: {}, currentSymbol: null });
 }
@@ -30,7 +35,7 @@ export function saveGame(state) {
   safeWrite(KEYS.game, state);
 }
 
-// Metrics
+// ── Metrics (non-PII) ──────────────────────────────────────────────────────
 function defaultMetrics() {
   return { visitors: 0, users: 0, keyActions: 0, returns: 0, ratings: [], sessionStart: null };
 }
@@ -67,32 +72,16 @@ export function trackRating(rating) {
 }
 export function resetMetrics() {
   safeWrite(KEYS.metrics, defaultMetrics());
-  safeWrite(KEYS.contacts, []);
 }
 export function exportMetrics() {
   return {
     metrics: loadMetrics(),
-    contacts: loadContacts(),
     exportedAt: new Date().toISOString(),
+    note: 'Contacts are stored in Supabase, not here.',
   };
 }
 
-// Contacts
-export function loadContacts() {
-  return safeRead(KEYS.contacts, []);
-}
-export function saveContact(contact) {
-  const list = loadContacts();
-  // Sanitize input
-  const sanitized = {
-    contact: String(contact.contact || '').slice(0, 200).replace(/[<>]/g, ''),
-    ts: Date.now(),
-  };
-  list.unshift(sanitized);
-  safeWrite(KEYS.contacts, list.slice(0, 500));
-}
-
-// Admin
+// ── Admin session flag ─────────────────────────────────────────────────────
 export function isAdmin() {
   return safeRead(KEYS.admin, false) === true;
 }

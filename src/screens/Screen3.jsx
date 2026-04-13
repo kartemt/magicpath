@@ -18,9 +18,9 @@ function ArtifactVisual({ symbolId }) {
       <div
         className="relative flex items-center justify-center rounded-2xl overflow-hidden"
         style={{
-          width: 88, height: 88,
-          boxShadow: `0 0 24px rgba(${sym.colorRgb},0.45)`,
-          border: `1.5px solid rgba(${sym.colorRgb},0.5)`,
+          width: 140, height: 140,
+          boxShadow: `0 0 36px rgba(${sym.colorRgb},0.5)`,
+          border: `2px solid rgba(${sym.colorRgb},0.55)`,
         }}
       >
         <img
@@ -37,10 +37,10 @@ function ArtifactVisual({ symbolId }) {
     <div
       className="flex items-center justify-center rounded-full"
       style={{
-        width: 80, height: 80,
+        width: 120, height: 120,
         background: `radial-gradient(circle, rgba(${sym.colorRgb},0.2) 0%, transparent 70%)`,
         border: `2px solid rgba(${sym.colorRgb},0.55)`,
-        fontSize: 36, color: sym.color,
+        fontSize: 54, color: sym.color,
       }}
     >
       {sym.emoji}
@@ -277,9 +277,19 @@ export default function Screen3() {
           initial={{ opacity: 0, scale: 0.75 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, type: 'spring', stiffness: 160 }}
-          className="flex items-center justify-center py-3 flex-shrink-0"
+          className="flex flex-col items-center gap-2 py-3 flex-shrink-0"
         >
           <ArtifactVisual symbolId={symbolId} />
+          <p className="font-semibold text-center" style={{
+            color: sym.color,
+            fontSize: 'clamp(0.875rem,2.4vw,1rem)',
+            textShadow: `0 0 18px rgba(${sym.colorRgb},0.5)`,
+          }}>
+            {sym.artifact}
+          </p>
+          <p className="text-xs" style={{ color: 'rgba(201,162,39,0.65)' }}>
+            {state.completedSymbols.length + 1}-й артефакт силы пробуждён
+          </p>
         </motion.div>
 
         <div className="ornament-line mb-4 flex-shrink-0" />
@@ -319,7 +329,7 @@ export default function Screen3() {
                 animate={{ opacity: selectedOptions.size > 0 ? 1 : 0.4, y: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                Принять {selectedOptions.size > 1 ? `эти ${selectedOptions.size} шага` : 'этот шаг'}
+                Хочу сделать этот шаг
               </motion.button>
             )}
           </AnimatePresence>
