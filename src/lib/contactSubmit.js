@@ -5,6 +5,19 @@
  */
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase.js';
 
+function sendCta() {
+  fetch(`${SUPABASE_URL}/rest/v1/game_events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ game: 'larets', event_type: 'cta', value: 1 }),
+  }).catch(() => {});
+}
+
 /** @returns {'ok' | 'empty' | 'error'} */
 export async function submitContact(raw) {
   const value = String(raw || '').replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim().slice(0, 200);
@@ -21,7 +34,8 @@ export async function submitContact(raw) {
       },
       body: JSON.stringify({ value }),
     });
-    return res.ok ? 'ok' : 'error';
+    if (res.ok) { sendCta(); return 'ok'; }
+    return 'error';
   } catch {
     return 'error';
   }

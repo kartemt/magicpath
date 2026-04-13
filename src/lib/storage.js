@@ -82,7 +82,7 @@ export function trackKeyAction() {
   const m = loadMetrics();
   m.keyActions = (m.keyActions || 0) + 1;
   saveMetrics(m);
-  sendEvent('cta');
+  sendEvent('screen3'); // выбор символа / старт сценария
 }
 export function trackReturn() {
   const m = loadMetrics();
